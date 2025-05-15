@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fun Tic-Tac-Toe Game</title>
+    <style>
+        :root {
+            --primary-color: #ff7979;
+            --secondary-color: #74b9ff;
+            --bg-color: #f9f9f9;
+            --board-color: #fff;
+            --border-color: #ddd;
+            --text-color: #333;
+            --x-color: #ff5252;
+            --o-color: #5271ff;
+            --title-gradient: linear-gradient(to right, #ff8a00, #da1b60, #8a2be2, #0089ff);
+        }
+        
+        /* Seasonal Themes */
+        .spring {
+            --primary-color: #a6e889;
+            --secondary-color: #ffbbdc;
+            --bg-color: #f0fff0;
+            --board-color: #f8ffea;
+            --border-color: #c1e1c1;
+            --text-color: #2e7d32;
+            --x-color: #4caf50;
+            --o-color: #e91e63;
+            --title-gradient: linear-gradient(to right, #4caf50, #8bc34a, #cddc39, #ffeb3b);
+        }
+        
+        .summer {
+            --primary-color: #ffcc29;
+            --secondary-color: #00bcd4;
+            --bg-color: #f9f9eb;
+            --board-color: #fffce8;
+            --border-color: #ffee93;
+            --text-color: #ff5722;
+            --x-color: #ff9800;
+            --o-color: #00bcd4;
+            --title-gradient: linear-gradient(to right, #ff9800, #ff5722, #ff9800, #ffeb3b);
+        }
+        
+        .fall {
+            --primary-color: #ff9800;
+            --secondary-color: #795548;
+            --bg-color: #fff8f0;
+            --board-color: #fffaf5;
+            --border-color: #ffe0b2;
+            --text-color: #5d4037;
+            --x-color: #ff5722;
+            --o-color: #8d6e63;
+            --title-gradient: linear-gradient(to right, #ff9800, #f57c00, #ff5722, #795548);
+        }
+        
+        .winter {
+            --primary-color: #81d4fa;
+            --secondary-color: #9575cd;
+            --bg-color: #f0f8ff;
+            --board-color: #f5faff;
+            --border-color: #bbdefb;
+            --text-color: #1565c0;
+            --x-color: #0288d1;
+            --o-color: #7e57c2;
+            --title-gradient: linear-gradient(to right, #81d4fa, #64b5f6, #9575cd, #7986cb);
+        }
+        
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            transition: all 0.5s ease;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: var(--title-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: rainbow 5s ease infinite;
+        }
+        
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .mode-selection {
+            margin-bottom: 20px;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 120px);
+            grid-template-rows: repeat(3, 120px);
+            gap: 10px;
+            background-color: var(--border-color);
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+        
+        .cell {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--board-color);
+            border-radius: 10px;
+            font-size: 3rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cell:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        
+        .status {
+            margin: 20px 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+            height: 40px;
+        }
+        
+        .turn-indicator {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+        .player {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .player-x {
+            color: var(--x-color);
+        }
+        
+        .player-o {
+            color: var(--o-color);
+        }
+        
+        .active-player {
+            transform: scale(1.1);
+            font-weight: bold;
+        }
+        
+        .fire-effect {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+        
+        .x-fire {
+            left: -20px;
+            background: linear-gradient(to right, #ff416c, transparent);
+            animation: fire-pulse 1.5s infinite;
+        }
+        
+        .o-fire {
+            right: -20px;
+            background: linear-gradient(to left, #4a90e2, transparent);
+            animation: fire-pulse 1.5s infinite;
+        }
+        
+        .show-fire {
+            opacity: 1;
+        }
+        
+        @keyframes fire-pulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.3; }
+        }
+        
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0.8;
+            animation: fall 5s linear infinite;
+        }
+        
+        @keyframes fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .trophy {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5rem;
+            animation: trophy-animation 1s ease-in-out infinite alternate;
+            z-index: 101;
+            display: none;
+        }
+        
+        @keyframes trophy-animation {
+            from { transform: translate(-50%, -50%) scale(1); }
+            to { transform: translate(-50%, -50%) scale(1.2); }
+        }
+        
+        .themes {
+            margin-top: 20px;
+        }
+        
+        .themes h3 {
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+        
+        .theme-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .theme-btn:hover {
+            transform: scale(1.2);
+        }
+        
+        .spring-btn {
+            background: linear-gradient(to right, #a6e889, #ffbbdc);
+        }
+        
+        .summer-btn {
+            background: linear-gradient(to right, #ffcc29, #00bcd4);
+        }
+        
+        .fall-btn {
+            background: linear-gradient(to right, #ff9800, #795548);
+        }
+        
+        .winter-btn {
+            background: linear-gradient(to right, #81d4fa, #9575cd);
+        }
+        
+        .restart-btn {
+            margin-top: 20px;
+            background-color: var(--secondary-color);
+        }
+        
+        /* Responsive layout */
+        @media (max-width: 600px) {
+            .board {
+                grid-template-columns: repeat(3, 90px);
+                grid-template-rows: repeat(3, 90px);
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .status {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ Tic-Tac-Toe Fun! ✨</h1>
+        
+        <div class="mode-selection">
+            <button id="player-vs-player">👥 Player vs Player</button>
+            <button id="player-vs-computer">🤖 Player vs Computer</button>
+        </div>
+        
+        <div class="game-container">
+            <div class="turn-indicator">
+                <div class="player player-x">
+                    <span>Player X</span>
+                    <span id="x-emoji">🔥</span>
+                </div>
+                <div class="player player-o">
+                    <span>Player O</span>
+                    <span id="o-emoji">💧</span>
+                </div>
+            </div>
+            
+            <div class="status" id="status">Select a game mode to start!</div>
+            
+            <div class="board" id="board">
+                <div class="cell" data-index="0"></div>
+                <div class="cell" data-index="1"></div>
+                <div class="cell" data-index="2"></div>
+                <div class="cell" data-index="3"></div>
+                <div class="cell" data-index="4"></div>
+                <div class="cell" data-index="5"></div>
+                <div class="cell" data-index="6"></div>
+                <div class="cell" data-index="7"></div>
+                <div class="cell" data-index="8"></div>
+                <div class="fire-effect x-fire" id="x-fire"></div>
+                <div class="fire-effect o-fire" id="o-fire"></div>
+            </div>
+            
+            <button class="restart-btn" id="restart">🔄 Restart Game</button>
+            
+            <div class="themes">
+                <h3>Choose a Theme!</h3>
+                <div style="display: flex; justify-content: center;">
+                    <div class="theme-btn spring-btn" data-theme="spring" title="Spring"></div>
+                    <div class="theme-btn summer-btn" data-theme="summer" title="Summer"></div>
+                    <div class="theme-btn fall-btn" data-theme="fall" title="Fall"></div>
+                    <div class="theme-btn winter-btn" data-theme="winter" title="Winter"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="celebration" id="celebration"></div>
+    <div class="trophy" id="trophy">🏆</div>
+    
+    <script>
+        // Game state
+        const gameState = {
+            mode: null, // 'player' or 'computer'
+            board: Array(9).fill(''),
+            currentPlayer: 'X',
+            gameOver: false,
+            winner: null,
+            playerXEmoji: '🔥',
+            playerOEmoji: '💧',
+            emojis: {
+                X: ['🔥', '❌', '🦁', '🦊', '🐲', '🌟', '⭐', '🚀'],
+                O: ['💧', '⭕', '🐬', '🦄', '🐳', '🌙', '❄️', '✨']
+            },
+            themes: {
+                spring: {
+                    emoji: {X: '🌷', O: '🦋'},
+                    fireX: 'linear-gradient(to right, #ff9a9e, transparent)',
+                    fireO: 'linear-gradient(to left, #a1c4fd, transparent)',
+                    backgroundImages: ['🌷', '🌿', '🌱', '🦋', '🐝', '🐞', '🐣', '🐰', '🐑', '🦢']
+                },
+                summer: {
+                    emoji: {X: '☀️', O: '🌊'},
+                    fireX: 'linear-gradient(to right, #ff416c, transparent)',
+                    fireO: 'linear-gradient(to left, #4a90e2, transparent)',
+                    backgroundImages: ['🌴', '🏄', '🍉', '🍦', '🏖️', '🐬', '🦀', '🐠', '🦎', '🦜']
+                },
+                fall: {
+                    emoji: {X: '🍁', O: '🍂'},
+                    fireX: 'linear-gradient(to right, #ff9800, transparent)',
+                    fireO: 'linear-gradient(to left, #795548, transparent)',
+                    backgroundImages: ['🍁', '🍂', '🎃', '🌰', '🍄', '🦊', '🦝', '🐿️', '🦌', '🐺']
+                },
+                winter: {
+                    emoji: {X: '❄️', O: '☃️'},
+                    fireX: 'linear-gradient(to right, #a1c4fd, transparent)',
+                    fireO: 'linear-gradient(to left, #c2e9fb, transparent)',
+                    backgroundImages: ['❄️', '☃️', '⛄', '🧣', '🎁', '🐧', '🦭', '🐻‍❄️', '🦊', '🐇']
+                }
+            },
+            currentTheme: 'summer'
+        };
+        
+        // DOM elements
+        const board = document.getElementById('board');
+        const cells = document.querySelectorAll('.cell');
+        const status = document.getElementById('status');
+        const playerVsPlayerBtn = document.getElementById('player-vs-player');
+        const playerVsComputerBtn = document.getElementById('player-vs-computer');
+        const restartBtn = document.getElementById('restart');
+        const xFire = document.getElementById('x-fire');
+        const oFire = document.getElementById('o-fire');
+        const celebration = document.getElementById('celebration');
+        const trophy = document.getElementById('trophy');
+        const xEmoji = document.getElementById('x-emoji');
+        const oEmoji = document.getElementById('o-emoji');
+        const themeBtns = document.querySelectorAll('.theme-btn');
+        
+        // Event listeners
+        playerVsPlayerBtn.addEventListener('click', () => startGame('player'));
+        playerVsComputerBtn.addEventListener('click', () => startGame('computer'));
+        restartBtn.addEventListener('click', restartGame);
+        cells.forEach(cell => cell.addEventListener('click', () => handleCellClick(parseInt(cell.dataset.index))));
+        
+        themeBtns.forEach(btn => {
+            btn.addEventListener('click', () => changeTheme(btn.dataset.theme));
+        });
+        
+        // Game functions
+        function startGame(mode) {
+            gameState.mode = mode;
+            gameState.board = Array(9).fill('');
+            gameState.currentPlayer = 'X';
+            gameState.gameOver = false;
+            gameState.winner = null;
+            
+            updateStatus(`Player ${gameState.currentPlayer}'s turn`);
+            updateBoardDisplay();
+            showPlayerTurn();
+            
+            // Random emoji selection at game start
+            randomizeEmojis();
+        }
+        
+        function restartGame() {
+            if (gameState.mode) {
+                startGame(gameState.mode);
+            } else {
+                updateStatus('Select a game mode to start!');
+            }
+        }
+        
+        function handleCellClick(index) {
+            // Ignore if game over or cell already filled or no mode selected
+            if (gameState.gameOver || gameState.board[index] !== '' || !gameState.mode) {
+                return;
+            }
+            
+            // Ignore if computer's turn
+            if (gameState.mode === 'computer' && gameState.currentPlayer === 'O') {
+                return;
+            }
+            
+            makeMove(index);
+            
+            // Computer move
+            if (gameState.mode === 'computer' && !gameState.gameOver && gameState.currentPlayer === 'O') {
+                setTimeout(() => {
+                    const computerMove = getComputerMove();
+                    makeMove(computerMove);
+                }, 700);
+            }
+        }
+        
+        function makeMove(index) {
+            gameState.board[index] = gameState.currentPlayer;
+            updateBoardDisplay();
+            
+            if (checkWin()) {
+                gameOver(`Player ${gameState.currentPlayer} wins! 🥳`);
+                gameState.winner = gameState.currentPlayer;
+                startCelebration();
+                return;
+            }
+            
+            if (checkDraw()) {
+                gameOver('It\'s a draw! 🤝');
+                return;
+            }
+            
+            // Switch player
+            gameState.currentPlayer = gameState.currentPlayer === 'X' ? 'O' : 'X';
+            updateStatus(`Player ${gameState.currentPlayer}'s turn`);
+            showPlayerTurn();
+        }
+        
+        function updateBoardDisplay() {
+            cells.forEach((cell, index) => {
+                const value = gameState.board[index];
+                if (value === 'X') {
+                    cell.innerHTML = `<span style="color: var(--x-color);">${gameState.playerXEmoji}</span>`;
+                    cell.style.color = 'var(--x-color)';
+                } else if (value === 'O') {
+                    cell.innerHTML = `<span style="color: var(--o-color);">${gameState.playerOEmoji}</span>`;
+                    cell.style.color = 'var(--o-color)';
+                } else {
+                    cell.textContent = '';
+                }
+            });
+        }
+        
+        function updateStatus(message) {
+            status.textContent = message;
+        }
+        
+        function gameOver(message) {
+            gameState.gameOver = true;
+            updateStatus(message);
+        }
+        
+        function checkWin() {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+                [0, 4, 8], [2, 4, 6]             // diagonals
+            ];
+            
+            return winPatterns.some(pattern => {
+                const [a, b, c] = pattern;
+                return gameState.board[a] !== '' && 
+                       gameState.board[a] === gameState.board[b] && 
+                       gameState.board[a] === gameState.board[c];
+            });
+        }
+        
+        function checkDraw() {
+            return gameState.board.every(cell => cell !== '');
+        }
+        
+        function getComputerMove() {
+            // Check for winning move
+            const potentialWin = findPotentialMove('O');
+            if (potentialWin !== -1) return potentialWin;
+            
+            // Block player's winning move
+            const blockMove = findPotentialMove('X');
+            if (blockMove !== -1) return blockMove;
+            
+            // Take center if available
+            if (gameState.board[4] === '') return 4;
+            
+            // Take corners
+            const corners = [0, 2, 6, 8];
+            const availableCorners = corners.filter(i => gameState.board[i] === '');
+            if (availableCorners.length > 0) {
+                return availableCorners[Math.floor(Math.random() * availableCorners.length)];
+            }
+            
+            // Take any available spot
+            const availableMoves = gameState.board
+                .map((cell, index) => cell === '' ? index : -1)
+                .filter(index => index !== -1);
+                
+            return availableMoves[Math.floor(Math.random() * availableMoves.length)];
+        }
+        
+        function findPotentialMove(player) {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+                [0, 4, 8], [2, 4, 6]             // diagonals
+            ];
+            
+            for (const pattern of winPatterns) {
+                const [a, b, c] = pattern;
+                // Check if player has two in a row and the third spot is empty
+                if (gameState.board[a] === player && gameState.board[b] === player && gameState.board[c] === '') {
+                    return c;
+                }
+                if (gameState.board[a] === player && gameState.board[c] === player && gameState.board[b] === '') {
+                    return b;
+                }
+                if (gameState.board[b] === player && gameState.board[c] === player && gameState.board[a] === '') {
+                    return a;
+                }
+            }
+            
+            return -1;  // No potential winning move
+        }
+        
+        function showPlayerTurn() {
+            const playerX = document.querySelector('.player-x');
+            const playerO = document.querySelector('.player-o');
+            
+            playerX.classList.toggle('active-player', gameState.currentPlayer === 'X');
+            playerO.classList.toggle('active-player', gameState.currentPlayer === 'O');
+            
+            // Show fire effects
+            xFire.classList.toggle('show-fire', gameState.currentPlayer === 'X');
+            oFire.classList.toggle('show-fire', gameState.currentPlayer === 'O');
+        }
+        
+        function startCelebration() {
+            // Show trophy
+            trophy.textContent = gameState.winner === 'X' ? `🏆 ${gameState.playerXEmoji}` : `🏆 ${gameState.playerOEmoji}`;
+            trophy.style.display = 'block';
+            
+            // Create confetti
+            celebration.style.display = 'block';
+            celebration.innerHTML = '';
+            
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                
+                // Random position, color, size, and delay
+                const left = Math.random() * 100;
+                const animDuration = 5 + Math.random() * 5;
+                const animDelay = Math.random() * 2;
+                
+                confetti.style.left = `${left}%`;
+                confetti.style.backgroundColor = getRandomColor();
+                confetti.style.width = `${5 + Math.random() * 10}px`;
+                confetti.style.height = `${5 + Math.random() * 10}px`;
+                confetti.style.animationDuration = `${animDuration}s`;
+                confetti.style.animationDelay = `${animDelay}s`;
+                
+                celebration.appendChild(confetti);
+            }
+            
+            // Shake the board
+            board.style.animation = 'none';
+            setTimeout(() => {
+                board.style.animation = 'shake 0.5s';
+            }, 10);
+            
+            // Clean up after celebration
+            setTimeout(() => {
+                celebration.style.display = 'none';
+                trophy.style.display = 'none';
+            }, 5000);
+        }
+        
+        function getRandomColor() {
+            const colors = ['#ff5252', '#ff4081', '#e040fb', '#7c4dff', '#536dfe', '#448aff', '#40c4ff', '#18ffff', '#64ffda', '#69f0ae', '#b2ff59', '#eeff41', '#ffff00', '#ffd740', '#ffab40', '#ff6e40'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+        
+        function randomizeEmojis() {
+            const randomXIndex = Math.floor(Math.random() * gameState.emojis.X.length);
+            const randomOIndex = Math.floor(Math.random() * gameState.emojis.O.length);
+            
+            gameState.playerXEmoji = gameState.emojis.X[randomXIndex];
+            gameState.playerOEmoji = gameState.emojis.O[randomOIndex];
+            
+            xEmoji.textContent = gameState.playerXEmoji;
+            oEmoji.textContent = gameState.playerOEmoji;
+        }
+        
+        function changeTheme(theme) {
+            if (!gameState.themes[theme]) return;
+            
+            gameState.currentTheme = theme;
+            document.body.className = theme;
+            
+            // Apply theme colors
+            const themeData = gameState.themes[theme];
+            
+            // Change emojis based on theme
+            gameState.playerXEmoji = themeData.emoji.X;
+            gameState.playerOEmoji = themeData.emoji.O;
+            xEmoji.textContent = gameState.playerXEmoji;
+            oEmoji.textContent = gameState.playerOEmoji;
+            
+            // Update fire effects
+            xFire.style.background = themeData.fireX;
+            oFire.style.background = themeData.fireO;
+            
+            // Update board display with new emojis
+            updateBoardDisplay();
+            
+            // Update player colors
+            const playerX = document.querySelector('.player-x');
+            const playerO = document.querySelector('.player-o');
+            playerX.style.color = 'var(--x-color)';
+            playerO.style.color = 'var(--o-color)';
+            
+            // Re-apply active player highlighting
+            showPlayerTurn();
+        }
+        
+        // Initialize with default theme
+        changeTheme('summer');
+        
+        // Create background theme elements
+        function createThemeBackground() {
+            const bgContainer = document.createElement('div');
+            bgContainer.className = 'theme-background';
+            bgContainer.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: -1;
+                opacity: 0.1;
+            `;
+            document.body.appendChild(bgContainer);
+            
+            return bgContainer;
+        }
+        
+        const bgContainer = createThemeBackground();
+        
+        function updateThemeBackground(theme) {
+            if (!gameState.themes[theme]) return;
+            
+            const images = gameState.themes[theme].backgroundImages;
+            bgContainer.innerHTML = '';
+            
+            // Add more background elements for a richer experience
+            for (let i = 0; i < 30; i++) {
+                const emoji = document.createElement('div');
+                const randomEmoji = images[Math.floor(Math.random() * images.length)];
+                emoji.textContent = randomEmoji;
+                
+                // Determine if it's an animal emoji (basic check for animal emojis)
+                const isAnimal = ['🐰', '🐑', '🦢', '🐞', '🐣', '🐝', '🐬', '🦀', '🐠', '🦎', '🦜', 
+                                '🦊', '🦝', '🐿️', '🦌', '🐺', '🐧', '🦭', '🐻‍❄️', '🐇'].includes(randomEmoji);
+                
+                // Animals are slightly larger
+                const size = isAnimal ? 30 + Math.random() * 40 : 20 + Math.random() * 30;
+                
+                // Apply styles with animation for animals
+                if (isAnimal) {
+                    const duration = 30 + Math.random() * 60;
+                    const delay = Math.random() * 30;
+                    emoji.style.cssText = `
+                        position: absolute;
+                        font-size: ${size}px;
+                        opacity: ${0.4 + Math.random() * 0.3};
+                        left: ${Math.random() * 100}%;
+                        top: ${Math.random() * 100}%;
+                        transform: rotate(${Math.random() * 20 - 10}deg);
+                        animation: floatAround ${duration}s linear ${delay}s infinite;
+                        z-index: ${isAnimal ? 0 : -1};
+                    `;
+                } else {
+                    emoji.style.cssText = `
+                        position: absolute;
+                        font-size: ${size}px;
+                        opacity: ${0.3 + Math.random() * 0.2};
+                        left: ${Math.random() * 100}%;
+                        top: ${Math.random() * 100}%;
+                        transform: rotate(${Math.random() * 360}deg);
+                        z-index: -1;
+                    `;
+                }
+                
+                bgContainer.appendChild(emoji);
+            }
+        }
+        
+        // Add theme background update to changeTheme function
+        const originalChangeTheme = changeTheme;
+        changeTheme = function(theme) {
+            originalChangeTheme(theme);
+            updateThemeBackground(theme);
+        };
+        
+        // Add animations
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                20%, 40%, 60%, 80% { transform: translateX(5px); }
+            }
+            
+            @keyframes floatAround {
+                0% { transform: translate(0, 0) rotate(0deg); }
+                25% { transform: translate(50px, 25px) rotate(5deg); }
+                50% { transform: translate(0, 50px) rotate(0deg); }
+                75% { transform: translate(-50px, 25px) rotate(-5deg); }
+                100% { transform: translate(0, 0) rotate(0deg); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
